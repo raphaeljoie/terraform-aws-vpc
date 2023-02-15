@@ -278,21 +278,6 @@ output "natgw_ids" {
   value       = aws_nat_gateway.this[*].id
 }
 
-output "igw_id" {
-  description = "The ID of the Internet Gateway"
-  value       = try(aws_internet_gateway.this[0].id, "")
-}
-
-output "igw_arn" {
-  description = "The ARN of the Internet Gateway"
-  value       = try(aws_internet_gateway.this[0].arn, "")
-}
-
-output "egress_only_internet_gateway_id" {
-  description = "The ID of the egress only Internet Gateway"
-  value       = try(aws_egress_only_internet_gateway.this[0].id, "")
-}
-
 output "vgw_id" {
   description = "The ID of the VPN Gateway"
   value       = try(aws_vpn_gateway.this[0].id, aws_vpn_gateway_attachment.this[0].vpn_gateway_id, "")

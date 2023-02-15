@@ -138,6 +138,21 @@ output "default_vpc_main_route_table_id" {
   value       = try(aws_default_vpc.this[0].main_route_table_id, "")
 }
 
+output "igw_id" {
+  description = "The ID of the Internet Gateway"
+  value       = try(aws_internet_gateway.this[0].id, "")
+}
+
+output "igw_arn" {
+  description = "The ARN of the Internet Gateway"
+  value       = try(aws_internet_gateway.this[0].arn, "")
+}
+
+output "egress_only_internet_gateway_id" {
+  description = "The ID of the egress only Internet Gateway"
+  value       = try(aws_egress_only_internet_gateway.this[0].id, "")
+}
+
 # Static values (arguments)
 output "azs" {
   description = "A list of availability zones specified as argument to this module"

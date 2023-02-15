@@ -206,6 +206,35 @@ resource "aws_default_network_acl" "this" {
   }
 }
 
+
+################################################################################
+# Internet Gateway
+################################################################################
+
+resource "aws_internet_gateway" "this" {
+  count = local.create_vpc && var.create_igw > 0 ? 1 : 0
+
+  vpc_id = aws_vpc.this[0].id
+
+  tags = merge(
+  { "Name" = var.name },
+  var.tags,
+  var.igw_tags,
+  )
+}
+
+resource "aws_egress_only_internet_gateway" "this" {
+  count = local.create_vpc && var.create_egress_only_igw && var.enable_ipv6 ? 1 : 0
+
+  vpc_id = aws_vpc.this[0].id
+
+  tags = merge(
+  { "Name" = var.name },
+  var.tags,
+  var.igw_tags,
+  )
+}
+
 ################################################################################
 # Customer Gateways
 ################################################################################

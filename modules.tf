@@ -172,8 +172,8 @@ module "vpc" {
   flow_log_cloudwatch_log_group_retention_in_days = var.flow_log_cloudwatch_log_group_retention_in_days
   flow_log_cloudwatch_log_group_kms_key_id = var.flow_log_cloudwatch_log_group_kms_key_id
   flow_log_max_aggregation_interval = var.flow_log_max_aggregation_interval
-  create_igw = var.create_igw
-  create_egress_only_igw = var.create_egress_only_igw
+  create_igw = var.create_igw && length(var.public_subnets) > 0
+  create_egress_only_igw = var.create_egress_only_igw && local.max_subnet_length > 0
   outpost_arn = var.outpost_arn
   outpost_az = var.outpost_az
   flow_log_file_format = var.flow_log_file_format
@@ -192,8 +192,9 @@ module "subnets" {
   source = "./modules/subnets"
 
   vpc_id = module.vpc.vpc_id
-  
-  create_vpc = var.create_vpc
+  igw_id = var.create_igw ? module.vpc.igw_id : null
+  egress_only_igw_id = var.create_egress_only_igw ? module.vpc.egress_only_internet_gateway_id : null
+
   name = var.name
   cidr = var.cidr
   enable_ipv6 = var.enable_ipv6
@@ -364,8 +365,6 @@ module "subnets" {
   flow_log_cloudwatch_log_group_retention_in_days = var.flow_log_cloudwatch_log_group_retention_in_days
   flow_log_cloudwatch_log_group_kms_key_id = var.flow_log_cloudwatch_log_group_kms_key_id
   flow_log_max_aggregation_interval = var.flow_log_max_aggregation_interval
-  create_igw = var.create_igw
-  create_egress_only_igw = var.create_egress_only_igw
   outpost_arn = var.outpost_arn
   outpost_az = var.outpost_az
   flow_log_file_format = var.flow_log_file_format
