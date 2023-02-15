@@ -212,7 +212,7 @@ resource "aws_default_network_acl" "this" {
 ################################################################################
 
 resource "aws_internet_gateway" "this" {
-  count = local.create_vpc && var.create_igw > 0 ? 1 : 0
+  count = local.create_vpc && var.create_igw ? 1 : 0
 
   vpc_id = aws_vpc.this[0].id
 
