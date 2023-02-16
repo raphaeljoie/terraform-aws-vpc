@@ -7,7 +7,7 @@ locals {
 
   flow_log_destination_arn                  = local.create_flow_log_cloudwatch_log_group ? try(aws_cloudwatch_log_group.flow_log[0].arn, null) : var.flow_log_destination_arn
   flow_log_iam_role_arn                     = var.flow_log_destination_type != "s3" && local.create_flow_log_cloudwatch_iam_role ? try(aws_iam_role.vpc_flow_log_cloudwatch[0].arn, null) : var.flow_log_cloudwatch_iam_role_arn
-  flow_log_cloudwatch_log_group_name_suffix = var.flow_log_cloudwatch_log_group_name_suffix == "" ? local.vpc_id : var.flow_log_cloudwatch_log_group_name_suffix
+  flow_log_cloudwatch_log_group_name_suffix = var.flow_log_cloudwatch_log_group_name_suffix == "" ? module.vpc.vpc_id : var.flow_log_cloudwatch_log_group_name_suffix
 }
 
 ################################################################################
@@ -22,7 +22,7 @@ resource "aws_flow_log" "this" {
   log_format               = var.flow_log_log_format
   iam_role_arn             = local.flow_log_iam_role_arn
   traffic_type             = var.flow_log_traffic_type
-  vpc_id                   = local.vpc_id
+  vpc_id                   = module.vpc.vpc_id
   max_aggregation_interval = var.flow_log_max_aggregation_interval
 
   dynamic "destination_options" {
