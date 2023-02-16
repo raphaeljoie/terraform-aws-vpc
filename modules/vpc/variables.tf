@@ -298,13 +298,13 @@ variable "default_security_group_tags" {
 variable "create_igw" {
   description = "Controls if an Internet Gateway is created for public subnets and the related routes that connect them."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "create_egress_only_igw" {
   description = "Controls if an Egress Only Internet Gateway is created and its related routes."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "use_ipam_pool" {
