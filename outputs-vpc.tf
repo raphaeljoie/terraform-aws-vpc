@@ -137,3 +137,18 @@ output "default_vpc_main_route_table_id" {
   description = "The ID of the main route table associated with the Default VPC"
   value = module.vpc.default_vpc_main_route_table_id
 }
+
+output "igw_id" {
+  description = "The ID of the Internet Gateway"
+  value = module.vpc.igw_id
+}
+
+output "igw_arn" {
+  description = "The ARN of the Internet Gateway"
+  value = module.vpc.igw_arn
+}
+
+output "egress_only_internet_gateway_id" {
+  description = "The ID of the egress only Internet Gateway"
+  value = module.vpc.egress_only_internet_gateway_id
+}

@@ -278,21 +278,6 @@ output "natgw_ids" {
   value = module.subnets.natgw_ids
 }
 
-output "igw_id" {
-  description = "The ID of the Internet Gateway"
-  value = module.subnets.igw_id
-}
-
-output "igw_arn" {
-  description = "The ARN of the Internet Gateway"
-  value = module.subnets.igw_arn
-}
-
-output "egress_only_internet_gateway_id" {
-  description = "The ID of the egress only Internet Gateway"
-  value = module.subnets.egress_only_internet_gateway_id
-}
-
 output "vgw_id" {
   description = "The ID of the VPN Gateway"
   value = module.subnets.vgw_id
