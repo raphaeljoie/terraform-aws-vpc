@@ -195,7 +195,6 @@ module "subnets" {
   igw_id = var.create_igw ? module.vpc.igw_id : null
   egress_only_igw_id = var.create_egress_only_igw ? module.vpc.egress_only_internet_gateway_id : null
 
-  name = var.name
   cidr = var.cidr
   enable_ipv6 = var.enable_ipv6
   private_subnet_ipv6_prefixes = var.private_subnet_ipv6_prefixes

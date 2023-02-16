@@ -27,7 +27,7 @@ resource "aws_route_table" "public" {
   vpc_id = data.aws_vpc.this.id
 
   tags = merge(
-    { "Name" = "${var.name}-${var.public_subnet_suffix}" },
+    { "Name" = "${data.aws_vpc.this.tags["Name"]}-${var.public_subnet_suffix}" },
     var.tags,
     var.public_route_table_tags,
   )
@@ -65,8 +65,8 @@ resource "aws_route_table" "private" {
 
   tags = merge(
     {
-      "Name" = var.single_nat_gateway ? "${var.name}-${var.private_subnet_suffix}" : format(
-        "${var.name}-${var.private_subnet_suffix}-%s",
+      "Name" = var.single_nat_gateway ? "${data.aws_vpc.this.tags["Name"]}-${var.private_subnet_suffix}" : format(
+        "${data.aws_vpc.this.tags["Name"]}-${var.private_subnet_suffix}-%s",
         element(var.azs, count.index),
       )
     },
@@ -86,8 +86,8 @@ resource "aws_route_table" "database" {
 
   tags = merge(
     {
-      "Name" = var.single_nat_gateway || var.create_database_internet_gateway_route ? "${var.name}-${var.database_subnet_suffix}" : format(
-        "${var.name}-${var.database_subnet_suffix}-%s",
+      "Name" = var.single_nat_gateway || var.create_database_internet_gateway_route ? "${data.aws_vpc.this.tags["Name"]}-${var.database_subnet_suffix}" : format(
+        "${data.aws_vpc.this.tags["Name"]}-${var.database_subnet_suffix}-%s",
         element(var.azs, count.index),
       )
     },
@@ -142,7 +142,7 @@ resource "aws_route_table" "redshift" {
   vpc_id = data.aws_vpc.this.id
 
   tags = merge(
-    { "Name" = "${var.name}-${var.redshift_subnet_suffix}" },
+    { "Name" = "${data.aws_vpc.this.tags["Name"]}-${var.redshift_subnet_suffix}" },
     var.tags,
     var.redshift_route_table_tags,
   )
@@ -158,7 +158,7 @@ resource "aws_route_table" "elasticache" {
   vpc_id = data.aws_vpc.this.id
 
   tags = merge(
-    { "Name" = "${var.name}-${var.elasticache_subnet_suffix}" },
+    { "Name" = "${data.aws_vpc.this.tags["Name"]}-${var.elasticache_subnet_suffix}" },
     var.tags,
     var.elasticache_route_table_tags,
   )
@@ -174,7 +174,7 @@ resource "aws_route_table" "intra" {
   vpc_id = data.aws_vpc.this.id
 
   tags = merge(
-    { "Name" = "${var.name}-${var.intra_subnet_suffix}" },
+    { "Name" = "${data.aws_vpc.this.tags["Name"]}-${var.intra_subnet_suffix}" },
     var.tags,
     var.intra_route_table_tags,
   )
@@ -200,7 +200,7 @@ resource "aws_subnet" "public" {
     {
       Name = try(
         var.public_subnet_names[count.index],
-        format("${var.name}-${var.public_subnet_suffix}-%s", element(var.azs, count.index))
+        format("${data.aws_vpc.this.tags["Name"]}-${var.public_subnet_suffix}-%s", element(var.azs, count.index))
       )
     },
     var.tags,
@@ -228,7 +228,7 @@ resource "aws_subnet" "private" {
     {
       Name = try(
         var.private_subnet_names[count.index],
-        format("${var.name}-${var.private_subnet_suffix}-%s", element(var.azs, count.index))
+        format("${data.aws_vpc.this.tags["Name"]}-${var.private_subnet_suffix}-%s", element(var.azs, count.index))
       )
     },
     var.tags,
@@ -257,7 +257,7 @@ resource "aws_subnet" "outpost" {
     {
       Name = try(
         var.outpost_subnet_names[count.index],
-        format("${var.name}-${var.outpost_subnet_suffix}-%s", var.outpost_az)
+        format("${data.aws_vpc.this.tags["Name"]}-${var.outpost_subnet_suffix}-%s", var.outpost_az)
       )
     },
     var.tags,
@@ -284,7 +284,7 @@ resource "aws_subnet" "database" {
     {
       Name = try(
         var.database_subnet_names[count.index],
-        format("${var.name}-${var.database_subnet_suffix}-%s", element(var.azs, count.index), )
+        format("${data.aws_vpc.this.tags["Name"]}-${var.database_subnet_suffix}-%s", element(var.azs, count.index), )
       )
     },
     var.tags,
@@ -295,13 +295,13 @@ resource "aws_subnet" "database" {
 resource "aws_db_subnet_group" "database" {
   count = local.create_vpc && length(var.database_subnets) > 0 && var.create_database_subnet_group ? 1 : 0
 
-  name        = lower(coalesce(var.database_subnet_group_name, var.name))
-  description = "Database subnet group for ${var.name}"
+  name        = lower(coalesce(var.database_subnet_group_name, data.aws_vpc.this.tags["Name"]))
+  description = "Database subnet group for ${data.aws_vpc.this.tags["Name"]}"
   subnet_ids  = aws_subnet.database[*].id
 
   tags = merge(
     {
-      "Name" = lower(coalesce(var.database_subnet_group_name, var.name))
+      "Name" = lower(coalesce(var.database_subnet_group_name, data.aws_vpc.this.tags["Name"]))
     },
     var.tags,
     var.database_subnet_group_tags,
@@ -327,7 +327,7 @@ resource "aws_subnet" "redshift" {
     {
       Name = try(
         var.redshift_subnet_names[count.index],
-        format("${var.name}-${var.redshift_subnet_suffix}-%s", element(var.azs, count.index))
+        format("${data.aws_vpc.this.tags["Name"]}-${var.redshift_subnet_suffix}-%s", element(var.azs, count.index))
       )
     },
     var.tags,
@@ -338,12 +338,12 @@ resource "aws_subnet" "redshift" {
 resource "aws_redshift_subnet_group" "redshift" {
   count = local.create_vpc && length(var.redshift_subnets) > 0 && var.create_redshift_subnet_group ? 1 : 0
 
-  name        = lower(coalesce(var.redshift_subnet_group_name, var.name))
-  description = "Redshift subnet group for ${var.name}"
+  name        = lower(coalesce(var.redshift_subnet_group_name, data.aws_vpc.this.tags["Name"]))
+  description = "Redshift subnet group for ${data.aws_vpc.this.tags["Name"]}"
   subnet_ids  = aws_subnet.redshift[*].id
 
   tags = merge(
-    { "Name" = coalesce(var.redshift_subnet_group_name, var.name) },
+    { "Name" = coalesce(var.redshift_subnet_group_name, data.aws_vpc.this.tags["Name"]) },
     var.tags,
     var.redshift_subnet_group_tags,
   )
@@ -368,7 +368,7 @@ resource "aws_subnet" "elasticache" {
     {
       Name = try(
         var.elasticache_subnet_names[count.index],
-        format("${var.name}-${var.elasticache_subnet_suffix}-%s", element(var.azs, count.index))
+        format("${data.aws_vpc.this.tags["Name"]}-${var.elasticache_subnet_suffix}-%s", element(var.azs, count.index))
       )
     },
     var.tags,
@@ -379,12 +379,12 @@ resource "aws_subnet" "elasticache" {
 resource "aws_elasticache_subnet_group" "elasticache" {
   count = local.create_vpc && length(var.elasticache_subnets) > 0 && var.create_elasticache_subnet_group ? 1 : 0
 
-  name        = coalesce(var.elasticache_subnet_group_name, var.name)
-  description = "ElastiCache subnet group for ${var.name}"
+  name        = coalesce(var.elasticache_subnet_group_name, data.aws_vpc.this.tags["Name"])
+  description = "ElastiCache subnet group for ${data.aws_vpc.this.tags["Name"]}"
   subnet_ids  = aws_subnet.elasticache[*].id
 
   tags = merge(
-    { "Name" = coalesce(var.elasticache_subnet_group_name, var.name) },
+    { "Name" = coalesce(var.elasticache_subnet_group_name, data.aws_vpc.this.tags["Name"]) },
     var.tags,
     var.elasticache_subnet_group_tags,
   )
@@ -409,7 +409,7 @@ resource "aws_subnet" "intra" {
     {
       Name = try(
         var.intra_subnet_names[count.index],
-        format("${var.name}-${var.intra_subnet_suffix}-%s", element(var.azs, count.index))
+        format("${data.aws_vpc.this.tags["Name"]}-${var.intra_subnet_suffix}-%s", element(var.azs, count.index))
       )
     },
     var.tags,
@@ -428,7 +428,7 @@ resource "aws_network_acl" "public" {
   subnet_ids = aws_subnet.public[*].id
 
   tags = merge(
-    { "Name" = "${var.name}-${var.public_subnet_suffix}" },
+    { "Name" = "${data.aws_vpc.this.tags["Name"]}-${var.public_subnet_suffix}" },
     var.tags,
     var.public_acl_tags,
   )
@@ -479,7 +479,7 @@ resource "aws_network_acl" "private" {
   subnet_ids = aws_subnet.private[*].id
 
   tags = merge(
-    { "Name" = "${var.name}-${var.private_subnet_suffix}" },
+    { "Name" = "${data.aws_vpc.this.tags["Name"]}-${var.private_subnet_suffix}" },
     var.tags,
     var.private_acl_tags,
   )
@@ -530,7 +530,7 @@ resource "aws_network_acl" "outpost" {
   subnet_ids = aws_subnet.outpost[*].id
 
   tags = merge(
-    { "Name" = "${var.name}-${var.outpost_subnet_suffix}" },
+    { "Name" = "${data.aws_vpc.this.tags["Name"]}-${var.outpost_subnet_suffix}" },
     var.tags,
     var.outpost_acl_tags,
   )
@@ -581,7 +581,7 @@ resource "aws_network_acl" "intra" {
   subnet_ids = aws_subnet.intra[*].id
 
   tags = merge(
-    { "Name" = "${var.name}-${var.intra_subnet_suffix}" },
+    { "Name" = "${data.aws_vpc.this.tags["Name"]}-${var.intra_subnet_suffix}" },
     var.tags,
     var.intra_acl_tags,
   )
@@ -632,7 +632,7 @@ resource "aws_network_acl" "database" {
   subnet_ids = aws_subnet.database[*].id
 
   tags = merge(
-    { "Name" = "${var.name}-${var.database_subnet_suffix}" },
+    { "Name" = "${data.aws_vpc.this.tags["Name"]}-${var.database_subnet_suffix}" },
     var.tags,
     var.database_acl_tags,
   )
@@ -683,7 +683,7 @@ resource "aws_network_acl" "redshift" {
   subnet_ids = aws_subnet.redshift[*].id
 
   tags = merge(
-    { "Name" = "${var.name}-${var.redshift_subnet_suffix}" },
+    { "Name" = "${data.aws_vpc.this.tags["Name"]}-${var.redshift_subnet_suffix}" },
     var.tags,
     var.redshift_acl_tags,
   )
@@ -734,7 +734,7 @@ resource "aws_network_acl" "elasticache" {
   subnet_ids = aws_subnet.elasticache[*].id
 
   tags = merge(
-    { "Name" = "${var.name}-${var.elasticache_subnet_suffix}" },
+    { "Name" = "${data.aws_vpc.this.tags["Name"]}-${var.elasticache_subnet_suffix}" },
     var.tags,
     var.elasticache_acl_tags,
   )
@@ -790,7 +790,7 @@ resource "aws_eip" "nat" {
   tags = merge(
     {
       "Name" = format(
-        "${var.name}-%s",
+        "${data.aws_vpc.this.tags["Name"]}-%s",
         element(var.azs, var.single_nat_gateway ? 0 : count.index),
       )
     },
@@ -814,7 +814,7 @@ resource "aws_nat_gateway" "this" {
   tags = merge(
     {
       "Name" = format(
-        "${var.name}-%s",
+        "${data.aws_vpc.this.tags["Name"]}-%s",
         element(var.azs, var.single_nat_gateway ? 0 : count.index),
       )
     },
@@ -938,7 +938,7 @@ resource "aws_vpn_gateway" "this" {
   availability_zone = var.vpn_gateway_az
 
   tags = merge(
-    { "Name" = var.name },
+    { "Name" = data.aws_vpc.this.tags["Name"] },
     var.tags,
     var.vpn_gateway_tags,
   )
